@@ -63,6 +63,9 @@ while [ ${IMG_COUNT} -ne $(ls -l ${IMGDIR} | wc -l) ]; do
         wget -q -nc -i ${BUILDDIR}/url.txt -P ${IMGDIR}
     done
 done
+
+find . -type f -not -name "*.*" -print0 | xargs -0 file | grep  'JPEG image data' | sed 's/:.*//' | xargs -I % mv % %.jpg
+
 IMG_COUNT_END=$(ls -l ${IMGDIR} | wc -l)
 IMG_COUNT_DL=$((${IMG_COUNT_END} - ${IMG_COUNT_ORIG}))
 echo "total DL: ${IMG_COUNT_DL}"
