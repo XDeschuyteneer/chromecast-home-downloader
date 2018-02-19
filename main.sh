@@ -5,7 +5,7 @@ REQUIRES="xmllint xdpyinfo"
 
 # default values
 DEFAULT_BUILDDIR=./build
-DEFAULT_IMGDIR=${BUILDDIR}/img
+DEFAULT_IMGDIR=${DEFAULT_BUILDDIR}/img
 DEFAULT_RETRIES=5
 
 # init values
