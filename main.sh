@@ -13,8 +13,21 @@ BUILDDIR=${DEFAULT_BUILDDIR}
 IMGDIR=${DEFAULT_IMGDIR}
 RETRIES=${DEFAULT_RETRIES}
 
+# calculate the screen resolution
+SCREEN_RESOLUTION=$(xdpyinfo | grep dimensions | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/')
+SCREEN_X=$(echo ${SCREEN_RESOLUTION} | awk -F 'x' '{print $1}')
+SCREEN_Y=$(echo ${SCREEN_RESOLUTION} | awk -F 'x' '{print $2}')
+
+# ensure all required tools are installed
+for tool in ${REQUIRES}; do
+    if ! [ -x "$(command -v ${tool})" ]; then
+        echo "Error: ${tool} is not installed." >&2
+        exit 1
+    fi
+done
+
 # parsing parameters
-while getopts "b:o:r:" opt; do
+while getopts "hb:o:r:x:y:" opt; do
   case $opt in
     b)
       export BUILDDIR=${OPTARG}
@@ -25,31 +38,27 @@ while getopts "b:o:r:" opt; do
     r)
       export RETRIES=${OPTARG}
       ;;
-    \?)
+    x)
+      export SCREEN_X=${OPTARG}
+      ;;
+    y)
+      export SCREEN_Y=${OPTARG}
+      ;;
+    \?|h)
       echo "Usage: $0 [OPTIONS]"
-      echo "\t-b DIR : build artifacts directory (default : ${DEFAULT_BUILDDIR})"
-      echo "\t-o DIR : download image directory (default : ${DEFAULT_IMGDIR})"
-      echo "\t-r NUM : number of retries to refresh the chromecast homepage wallpaper list (default : ${DEFAULT_RETRIES})"
+      echo -e "\t-b DIR : build artifacts directory (default : ${DEFAULT_BUILDDIR})"
+      echo -e "\t-o DIR : download image directory (default : ${DEFAULT_IMGDIR})"
+      echo -e "\t-r NUM : number of retries to refresh the chromecast homepage wallpaper list (default : ${DEFAULT_RETRIES})"
+      echo -e "\t-x NUM : screen width (current: ${SCREEN_X})"
+      echo -e "\t-y NUM : screen height (current : ${SCREEN_Y})"
+      exit
       ;;
   esac
-done
-
-# ensure all required tools are installed
-for tool in ${REQUIRES}; do
-    if ! [ -x "$(command -v ${tool})" ]; then
-        echo "Error: ${tool} is not installed." >&2
-        exit 1
-    fi
 done
 
 # setup of the env
 mkdir -p ${BUILDDIR}
 mkdir -p ${IMGDIR}
-
-# calculate the screen resolution
-SCREEN_RESOLUTION=$(xdpyinfo | grep dimensions | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/')
-SCREEN_X=$(echo ${SCREEN_RESOLUTION} | awk -F 'x' '{print $1}')
-SCREEN_Y=$(echo ${SCREEN_RESOLUTION} | awk -F 'x' '{print $2}')
 
 # download the images
 IMG_COUNT_ORIG=$(ls -l ${IMGDIR} | wc -l)
